@@ -266,8 +266,9 @@ export async function questionAnswerJson(req, res) {
       res.json({err: "No question being asked"});
       return;
     }
-
+    
     const question = await Question.findById(req.body.id);
+    console.log('request send');
 
     if (!question) {
       res.json({err: "Question not found"});
