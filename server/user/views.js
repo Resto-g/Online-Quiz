@@ -196,7 +196,8 @@ export function updateUser(req, res) {
 }
 
 const adminIds = [
-  '116237864387312784020' // Jake
+  '116237864387312784020',// Jake
+  '114787160188858148562' //bibo 
 ];
 
 export function requiresAdminHtml(req, res, next) {
