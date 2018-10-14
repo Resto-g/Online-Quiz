@@ -1,30 +1,30 @@
 /**
-*
-* Copyright 2016 Google Inc. All rights reserved.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
-import {h, render} from 'preact';
+ *
+ * Copyright 2016 Google Inc. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { h, render } from "preact";
 
-import {Login, Logout} from './user';
-import BoundComponent from './bound-component';
-import Intro from './intro';
-import QuestionWaiting from './question-waiting';
-import LoginStatus from './login-status';
-import Question from './question';
-import Transition from './transition';
-import EndScreen from './end-screen';
-import LongPoll from '../long-poll';
+import { Login, Logout } from "./user";
+import BoundComponent from "./bound-component";
+import Intro from "./intro";
+import QuestionWaiting from "./question-waiting";
+import LoginStatus from "./login-status";
+import Question from "./question";
+import Transition from "./transition";
+import EndScreen from "./end-screen";
+import LongPoll from "../long-poll";
 
 export default class App extends BoundComponent {
   constructor(props) {
@@ -54,48 +54,65 @@ export default class App extends BoundComponent {
         requestAnimationFrame(() => {
           const longPoll = new LongPoll(props.initialState.lastMessageTime);
 
-          longPoll.on('message', msg => {
-            if (msg.correctAnswers) { // update the score
+          longPoll.on("message", msg => {
+            if (msg.correctAnswers) {
+              // update the score
               // TODO: change view while this is updating?
-              fetch('/me.json', {
-                credentials: 'include'
-              }).then(r => r.json()).then(data => {
-                this.setState({user: data.user});
-              });
+              fetch("/me.json", {
+                credentials: "include"
+              })
+                .then(r => r.json())
+                .then(data => {
+                  this.setState({ user: data.user });
+                });
             }
             // Is question changing?
-            if (msg.question && (!this.state.question || this.state.question.id != msg.question.id)) {
+            if (
+              msg.question &&
+              (!this.state.question ||
+                this.state.question.id != msg.question.id)
+            ) {
               // Reset submitted questions
               msg.answersSubmitted = [];
             }
             this.setState(msg);
           });
-        })
+        });
       });
     }
   }
   onUserUpdate(user) {
-    this.setState({user});
+    this.setState({ user });
   }
   onLogout() {
     this.setState({
       user: null
     });
   }
-  render({server}, {user, question, questionClosed, correctAnswers, answersSubmitted, naiveLoginAllowed, showEndScreen}) {
+  render(
+    { server },
+    {
+      user,
+      question,
+      questionClosed,
+      correctAnswers,
+      answersSubmitted,
+      naiveLoginAllowed,
+      showEndScreen
+    }
+  ) {
     // Question: OPEN
-    const shouldShowQuestion = (question && !server) ||
-
+    const shouldShowQuestion =
+      (question && !server) ||
       // Question: CLOSED
       (question && questionClosed) ||
-
       // Question: REVEALED
       (question && questionClosed && correctAnswers && correctAnswers.length);
 
     return (
       <div class="app">
         <header class="page-header">
-          <div class="title">The Big Web Quiz</div>
+          <div class="title">Cyber Trivia Quiz</div>
           <LoginStatus
             server={server}
             user={user}
@@ -104,48 +121,54 @@ export default class App extends BoundComponent {
           />
         </header>
         <div class="container">
-          {showEndScreen ?
+          {showEndScreen ? (
             <EndScreen />
-            :
-            (user ?
-              (shouldShowQuestion?
-                <Question
-                  key={`question-${question.id}`}
-                  id={question.id}
-                  title={question.title}
-                  text={question.text}
-                  multiple={question.multiple}
-                  answers={question.answers}
-                  code={question.code}
-                  codeType={question.codeType}
-                  closed={questionClosed}
-                  correctAnswers={correctAnswers}
-                  answersSubmitted={answersSubmitted}
-                />
-                :
-                <QuestionWaiting
-                  key="question-waiting"
-                  user={user}
-                  server={server}
-                  onUserUpdate={this.onUserUpdate}
-                />
-              )
-              :
-              <Intro key="intro" naiveLoginAllowed={naiveLoginAllowed}/>
+          ) : user ? (
+            shouldShowQuestion ? (
+              <Question
+                key={`question-${question.id}`}
+                id={question.id}
+                title={question.title}
+                text={question.text}
+                multiple={question.multiple}
+                answers={question.answers}
+                code={question.code}
+                codeType={question.codeType}
+                closed={questionClosed}
+                correctAnswers={correctAnswers}
+                answersSubmitted={answersSubmitted}
+              />
+            ) : (
+              <QuestionWaiting
+                key="question-waiting"
+                user={user}
+                server={server}
+                onUserUpdate={this.onUserUpdate}
+              />
             )
-          }
+          ) : (
+            <Intro key="intro" naiveLoginAllowed={naiveLoginAllowed} />
+          )}
         </div>
-        <a class="privacy" href="https://www.google.com/policies">Google Privacy Policy and Terms of Service</a>
-        {server &&
+        <a class="privacy" href="https://www.google.com/policies">
+          Google Privacy Policy and Terms of Service
+        </a>
+        {server && (
           <div class="img-preloads">
-            <img src="/static/images/ic_check_circle_black_24px.svg" alt=""/>
-            <img src="/static/images/ic_check_circle_white_24px.svg" alt=""/>
-            <img src="/static/images/ic_check_circle_outline_black_24px.svg" alt=""/>
-            <img src="/static/images/ic_check_circle_outline_white_24px.svg" alt=""/>
-            <img src="/static/images/ic_close_white_24px.svg" alt=""/>
-            <img src="/static/images/spinner.png" alt=""/>
+            <img src="/static/images/ic_check_circle_black_24px.svg" alt="" />
+            <img src="/static/images/ic_check_circle_white_24px.svg" alt="" />
+            <img
+              src="/static/images/ic_check_circle_outline_black_24px.svg"
+              alt=""
+            />
+            <img
+              src="/static/images/ic_check_circle_outline_white_24px.svg"
+              alt=""
+            />
+            <img src="/static/images/ic_close_white_24px.svg" alt="" />
+            <img src="/static/images/spinner.png" alt="" />
           </div>
-        }
+        )}
       </div>
     );
   }
@@ -154,4 +177,3 @@ export default class App extends BoundComponent {
 App.defaultProps = {
   server: false
 };
-
