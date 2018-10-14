@@ -1,5 +1,5 @@
 {
-  "name": "Cyber Trivia Quiz",
+  "name": "Cyber_Trivia_Quiz",
   "version": "1.0.0",
   "description": "",
   "main": "server-build/index.js",
